@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.wwork4.mapper.InteractionMapper">
+    <select id="selectByIds" resultType="com.example.wwork4.pojo.DO.VideoDO">
+        select * from video where id in
+        <foreach collection="videoIds" item="videoId" open="(" close=")" separator=",">
+            #{videoId}
+        </foreach>
+        LIMIT #{start}, #{page_size}
+    </select>
+
+
+
+<!--&gt;</delete>-->
+</mapper>
