@@ -21,10 +21,14 @@ public interface VideoService {
      * @param keyword 搜索关键词
      * @return 搜索结果
      */
-    PageBean searchVideo(String keyword,Integer page_num,Integer page_size,String from_date,String to_date,Integer username);
+    PageBean searchVideo(String keyword,Integer page_num,Integer page_size,String from_date,String to_date,Integer user_id);
     /**
      * 点击量排行榜服务
      * @return 排行榜视频列表
      */
     PageBean getVideoRank(Integer page_num,Integer page_size);
+
+    Result listVideoOrderByCreatedTime(  Boolean order);
+
+    Result listVideoHistory();
 }

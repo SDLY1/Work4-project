@@ -53,10 +53,24 @@ public class VideoServiceImpl implements VideoService {
     }
 
     @Override
-    public PageBean searchVideo(String keyword, Integer page_num, Integer page_size, String from_date, String to_date, Integer username) {
+    public PageBean searchVideo(String keyword, Integer page_num, Integer page_size, String from_date, String to_date, Integer user_id) {
+        //从数据库中查找数据
         Integer start = page_num*page_size;
-        List<VideoDO> videoList=videoMapper.searchVideo(keyword,start,page_size,from_date,to_date,username);
+        //将空字符串转成null.
+        if(from_date.isEmpty()){
+            from_date=null;
+        }
+        if(to_date.isEmpty()){
+            to_date=null;
+        }
+        List<VideoDO> videoList=videoMapper.searchVideo(keyword,start,page_size,from_date,to_date,user_id);
         Long count = (long) videoList.size();
+        if(keyword!=null){
+            String key= "video:Search:History: ";
+            stringRedisTemplate.opsForList().leftPush(key,keyword);
+            //只保留最近10条记录
+            stringRedisTemplate.opsForList().trim(key,0,9);
+        }
         return new PageBean(count,videoList);
     }
 
@@ -72,4 +86,23 @@ public class VideoServiceImpl implements VideoService {
         List<VideoDO> videoedRank=videoMapper.videoRank(videolist);
         return new PageBean(count,videoedRank);
     }
+
+    @Override
+    public Result listVideoOrderByCreatedTime( Boolean order) {
+        String pos_order;
+        if(order){
+            pos_order="asc";
+        }else{
+            pos_order="desc";
+        }
+        return Result.success(videoMapper.VideoOrderByCreatedTime(pos_order));
+    }
+
+    @Override
+    public Result listVideoHistory() {
+        String key= "video:Search:History: ";
+        List<String> list=stringRedisTemplate.opsForList().range(key,0,9);
+        return Result.success(list);
+    }
+
 }

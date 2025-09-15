@@ -15,8 +15,9 @@ public class InteractionController {
 
     /**
      * 点赞操作接口
-     * @param videoId 视频ID
+     * @param video_id 视频ID
      * @param userId 用户ID
+     * @param action_type 操作类型
      * @return 点赞结果
      */
     @PostMapping("/like/action")
@@ -25,8 +26,9 @@ public class InteractionController {
     }
     /**
      * 点赞列表接口
-     * @param videoId 视频ID
-     * @return 点赞用户列表
+     *@param user_id 用户ID
+     *@param page_num 分页数量
+     * @param page_size 分页大小
      */
     @GetMapping ("/like/list")
     public Result getLikeList(@RequestParam Integer user_id,@RequestParam Integer page_num, @RequestParam Integer page_size) {
@@ -36,9 +38,10 @@ public class InteractionController {
     }
     /**
      * 评论接口
-     * @param videoId 视频ID
-     * @param userId 用户ID
+     * @param video_id 视频ID
+     * @param user_id 用户ID
      * @param content 评论内容
+     * @param parent_id 父评论ID
      * @return 评论结果
      */
     @PostMapping("/comment/publish")
@@ -47,7 +50,9 @@ public class InteractionController {
     }
     /**
      * 评论列表接口
-     * @param videoId 视频ID
+     * @param video_id 视频ID
+     * @param page_num 分页数量
+     * @param page_size 分页大小
      * @return 评论列表
      */
     @GetMapping("/comment/list")
@@ -60,8 +65,8 @@ public class InteractionController {
     // InteractionController.java（续）
     /**
      * 删除评论接口
-     * @param commentId 评论ID
-     * @param userId 用户ID
+     * @param comment_id 评论ID
+     * @param video_id 用户ID
      * @return 删除结果
      */
     @DeleteMapping("/comment/delete")
@@ -69,6 +74,11 @@ public class InteractionController {
         return interactionService.deleteComment(video_id,comment_id);
     }
 
+    /**
+     * 视频点击
+     * @param video_id 用户ID
+     * @return 点击结果
+     */
     @PostMapping("/click")
     public Result clickVideo(String video_id) {
 

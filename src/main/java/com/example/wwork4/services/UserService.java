@@ -28,7 +28,7 @@ public interface UserService {
     Result getUserInfo(Integer id);
     /**
      * 上传头像服务
-     * @param name 用户名
+     * @param id 用户名
      * @param file 头像文件
      * @return 上传结果
      */

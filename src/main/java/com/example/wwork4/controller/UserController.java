@@ -22,7 +22,6 @@ public class UserController {
 
     /**
      * 用户注册接口
-
      */
     @PostMapping("/register")
     public Result register( RegisterDTO registerDTO) {
@@ -31,32 +30,28 @@ public class UserController {
     }
     /**
      * 用户登录接口
-
      */
     @PostMapping("/login")
     public Result login( RegisterDTO registerDTO){
         log.info("用户登入:{}",registerDTO);
-
-
-
         //登录失败，返回错误信息。
         return userService.login(registerDTO);
     }
 
     /**
      * 获取用户信息接口
-
      */
     @GetMapping("/info")
     public Result getUserInfo(@RequestParam Integer user_id) {
+        log.info("获取 "+user_id+" 用户信息");
         return userService.getUserInfo(user_id);
     }
     /**
      * 上传头像接口
-
      */
     @PutMapping ("/avatar/upload")
     public Result updateAvatar(MultipartFile image,Integer id)throws Exception {
+        log.info(id+"用户更改头像");
         return userService.updateAvatar(image,id);
     }
 

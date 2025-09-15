@@ -18,18 +18,18 @@ public class SocialController {
 
     /**
      * 关注操作接口
-     * @param userId 用户ID
-     * @param followUserId 被关注用户ID
+     * @param social 关注对象
      * @return 关注结果
      */
     @PostMapping("/relation/action")
     public Result saveFollowUser(@ModelAttribute SocialDO social ){
+
         return socialService.saveFollowUser(social);
     }
 
     /**
      * 关注列表接口
-     * @param userId 用户ID
+     * @param user_id 用户ID
      * @return 关注用户列表
      */
     @GetMapping("/follow/list")
@@ -40,7 +40,7 @@ public class SocialController {
     }
     /**
      * 粉丝列表接口
-     * @param userId 用户ID
+     * @param user_id 用户ID
      * @return 粉丝用户列表
      */
     @GetMapping("/follower/list")
@@ -49,6 +49,14 @@ public class SocialController {
         PageBean pageBean=socialService.getFollowerList(user_id,page_num,page_size);
         return Result.success(pageBean);
     }
+
+    /**
+     * 互关列表接口
+     * @param user_id 用户id
+     * @param page_num 分页数量
+     * @param page_size 分页大小
+     * @return 互关列表
+     */
     @GetMapping("/friends/list")
     public Result getFriendList(Integer user_id, Integer page_num, Integer page_size) {
         log.info("查询朋友列表");

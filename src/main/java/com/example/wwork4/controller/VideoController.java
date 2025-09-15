@@ -37,17 +37,24 @@ public class VideoController {
      * 搜索视频接口
      */
     @PostMapping("/search")
-    public Result searchVideo(@RequestParam String keywords,@RequestParam Integer page_num,@RequestParam Integer page_size,@RequestParam String from_date,@RequestParam String to_date,@RequestParam Integer username) {
-        PageBean pageBean= videoService.searchVideo(keywords,page_num,page_size,from_date,to_date,username);
+    public Result searchVideo(@RequestParam String keywords,@RequestParam Integer page_num,@RequestParam Integer page_size, @RequestParam(required = false) String from_date,@RequestParam(required = false) String to_date,@RequestParam(required = false) Integer user_id) {
+        PageBean pageBean= videoService.searchVideo(keywords,page_num,page_size,from_date,to_date,user_id);
         return Result.success(pageBean);
     }
     /**
      * 点击量排行榜接口
-     * @return 排行榜视频列表
      */
     @GetMapping("/popular")
     public Result getVideoRank(@RequestParam Integer page_num,@RequestParam Integer page_size) {
         PageBean pageBean=videoService.getVideoRank(page_num,page_size);
         return Result.success(pageBean);
+    }
+    @GetMapping("/order")
+    public Result listVideoOrderByCreatedTime (Boolean order){
+        return videoService.listVideoOrderByCreatedTime(order);
+    }
+    @GetMapping("/history")
+    public Result listVideoHistory(){
+        return videoService.listVideoHistory();
     }
 }
