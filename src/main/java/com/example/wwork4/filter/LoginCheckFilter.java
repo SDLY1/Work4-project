@@ -9,12 +9,14 @@ import jakarta.servlet.annotation.WebFilter;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.web.servlet.ServletComponentScan;
 import org.springframework.util.StringUtils;
 
 import java.io.IOException;
 import java.net.http.HttpRequest;
 
 @Slf4j
+
 @WebFilter(urlPatterns = "/*")
 public class LoginCheckFilter implements Filter {
     @Override
@@ -27,6 +29,11 @@ public class LoginCheckFilter implements Filter {
         //判断请求中是否包含login,如果包含，则是登录操作，放行。
         if(url.contains("login")){
             log.info("登录操作，放行。。");
+            filterChain.doFilter(servletRequest,servletResponse);
+            return ;
+        }
+        if(url.contains("register")){
+            log.info("注册操作，放行。。");
             filterChain.doFilter(servletRequest,servletResponse);
             return ;
         }
