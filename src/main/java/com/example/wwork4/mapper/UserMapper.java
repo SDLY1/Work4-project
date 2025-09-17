@@ -22,6 +22,6 @@ public interface UserMapper {
     public UserVO getUser(Integer id);
     @Update("update user set avatar = (#{file}) where id =#{id}")
     public void updateAvatar(String file,Integer id);
-    @Select("select id,username,password,avatar,created,updated,deleted from user where username= #{username} and password=#{password}")
+    @Select("select id,username,password,avatar,created createTime,updated updateTime,deleted deletedTime from user where username= #{username} and password=#{password}")
     UserDO getByUsernameAndPassword(RegisterDTO registerDTO);
 }

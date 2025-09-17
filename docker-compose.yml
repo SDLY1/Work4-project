@@ -1,39 +1,53 @@
 version: '3.8'
 
 services:
-  app:
-    build: src  # 使用当前目录的 Dockerfile 构建镜像
-    container_name: wwork4-app
-    ports:
-      - "8080:8080"
-    environment:
-      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql-db:3306/work4
-      - SPRING_DATASOURCE_USERNAME=root
-      - SPRING_DATASOURCE_PASSWORD=123456
-      - SPRING_REDIS_HOST=redis
-    depends_on:
-      - mysql-db
-      - redis
-
   mysql-db:
     image: mysql:8.0
     container_name: mysql-db
     environment:
       MYSQL_ROOT_PASSWORD: 123456
       MYSQL_DATABASE: work4
+      MYSQL_INITDB_SKIP_TZINFO: 1  # 加速启动
     ports:
       - "3306:3306"
     volumes:
       - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-uroot", "-p123456"]
+      interval: 5s
+      timeout: 3s
+      retries: 10  # 最多等待 50 秒
 
   redis:
-    image: redis:6.2
+    image: redis:6.2-alpine
     container_name: redis
     ports:
       - "6379:6379"
     volumes:
-      - redis_data:/data docker info | findstr "Registry Mirrors"
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 3s
+      timeout: 2s
+      retries: 5  # 最多等待 15 秒
 
+  app:
+    build: .
+    container_name: wwork4-app
+    ports:
+      - "8080:8080"
+    environment:
+      # 关键！必须用服务名（不是 localhost）
+      SPRING_DATASOURCE_URL: "jdbc:mysql://mysql-db:3306/work4?createDatabaseIfNotExist=true&connectionTimeout=30000"
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: 123456
+      SPRING_REDIS_HOST: redis  # 注意这里是服务名
+    depends_on:
+      mysql-db:
+        condition: service_healthy  # 必须等待 MySQL 就绪
+      redis:
+        condition: service_healthy  # 必须等待 Redis 就绪
+    restart: unless-stopped
 
 volumes:
   mysql_data:
