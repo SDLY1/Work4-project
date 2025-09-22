@@ -93,7 +93,7 @@ public class InteractionServiceImpl implements InteractionService {
         return new PageBean(count,commentList);
     }
 
-    // InteractionServiceImpl.java（续）
+
     @Override
     public Result deleteComment(String video_id,String comment_id) {
         // 实现删除评论逻辑，例如从数据库删除评论信息

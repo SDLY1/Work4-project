@@ -29,6 +29,8 @@ public class UserServiceImpl implements UserService {
             UserDO user=new UserDO();
             user.setUsername(registerDTO.getUsername());
             user.setPassword(registerDTO.getPassword());
+            //设置默认头像路径
+            user.setAvatar("xxxxxxx");
             user.setCreateTime(LocalDateTime.now());
             user.setUpdateTime(LocalDateTime.now());
             userMapper.register(user);
