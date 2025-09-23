@@ -2,7 +2,9 @@ package com.example.wwork4.filter;
 
 import com.alibaba.fastjson.JSONObject;
 import com.example.wwork4.pojo.Result;
+import com.example.wwork4.utils.JwtContext;
 import com.example.wwork4.utils.JwtUtils;
+import io.jsonwebtoken.Claims;
 import io.netty.util.internal.StringUtil;
 import jakarta.servlet.*;
 import jakarta.servlet.annotation.WebFilter;
@@ -48,18 +50,27 @@ public class LoginCheckFilter implements Filter {
             return ;
         }
         //解析token
-        try {
-            JwtUtils.parseJWT(jwt);
-        }catch (Exception e){
-            e.printStackTrace();
-            log.info("解析令牌失败，返回未登录错误信息");
-            Result error =Result.error("NO_LOGIN");
-            String notLogin=JSONObject.toJSONString(error);
-            resp.getWriter().write(notLogin);
-            return ;
-        }
-        //放行
-        log.info("放行");
-        filterChain.doFilter(servletRequest,servletResponse);
+
+
+
+
+            try {
+                Claims claims = JwtUtils.parseJWT(jwt);
+                JwtContext.setClaims(claims);
+                log.info("放行");
+                filterChain.doFilter(servletRequest, servletResponse);
+            } catch (Exception e) {
+                e.printStackTrace();
+                log.info("解析令牌失败，返回未登录错误信息");
+                Result error = Result.error("NO_LOGIN");
+                String notLogin = JSONObject.toJSONString(error);
+                resp.getWriter().write(notLogin);
+                return;
+            }finally {
+                JwtContext.clear();
+            }
+            //放行
+
+
     }
 }

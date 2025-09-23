@@ -9,16 +9,17 @@ import com.example.wwork4.mapper.UserMapper;
 import com.example.wwork4.pojo.VO.LoginVO;
 import com.example.wwork4.pojo.VO.UserVO;
 import com.example.wwork4.services.UserService;
+import com.example.wwork4.utils.JwtContext;
 import com.example.wwork4.utils.JwtUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestAttribute;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
-
 @Service
 public class UserServiceImpl implements UserService {
     @Autowired
@@ -55,6 +56,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public Result getUserInfo(Integer id) {
         // 实现获取用户信息逻辑，例如从数据库查询用户信息
+//        System.out.println(JwtContext.getCurrentUserId());
         UserVO user =userMapper.getUser(id);
         if(user == null){
             return  Result.error("没有此用户");
