@@ -45,7 +45,7 @@ public class InteractionController {
      * @return 评论结果
      */
     @PostMapping("/comment/publish")
-    public Result commentVideo(String video_id , String content,String user_id,String parent_id) {
+    public Result commentVideo( String video_id , String content,String user_id,String parent_id) {
         return interactionService.commentVideo(video_id, content,user_id,parent_id);
     }
     /**

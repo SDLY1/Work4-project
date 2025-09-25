@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class SocialDO {
-    Integer user_id;
-    Integer to_user_id;
-    Integer action_type;
+    private Integer user_id;
+    private Integer to_user_id;
+    private Integer action_type;
 }

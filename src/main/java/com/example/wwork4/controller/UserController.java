@@ -2,16 +2,12 @@ package com.example.wwork4.controller;
 
 import com.example.wwork4.pojo.DTO.RegisterDTO;
 import com.example.wwork4.pojo.Result;
-import com.example.wwork4.pojo.DO.UserDO;
 import com.example.wwork4.services.UserService;
-import com.example.wwork4.utils.JwtUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.HashMap;
-import java.util.Map;
 @Slf4j
 @RestController
 @RequestMapping("/user")

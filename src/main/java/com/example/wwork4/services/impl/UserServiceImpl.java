@@ -9,11 +9,9 @@ import com.example.wwork4.mapper.UserMapper;
 import com.example.wwork4.pojo.VO.LoginVO;
 import com.example.wwork4.pojo.VO.UserVO;
 import com.example.wwork4.services.UserService;
-import com.example.wwork4.utils.JwtContext;
 import com.example.wwork4.utils.JwtUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestAttribute;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;

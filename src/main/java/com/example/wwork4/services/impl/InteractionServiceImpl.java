@@ -20,7 +20,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Service
 public class InteractionServiceImpl implements InteractionService {
     private final AtomicInteger clickCounter = new AtomicInteger(0);
-    private final int BATCH_SIZE = 1000;
     @Autowired
     private InteractionMapper interactionMapper;
     @Autowired
@@ -103,7 +102,7 @@ public class InteractionServiceImpl implements InteractionService {
         // 实现删除评论逻辑，例如从数据库删除评论信息
         interactionMapper.deleteComment (video_id, comment_id);
         String parent_id= String.valueOf(interactionMapper.findParentId(video_id,comment_id));
-        if(parent_id.isEmpty()){
+        if(!parent_id.isEmpty()){
 //            Integer id=Integer.valueOf(parent_id);
             interactionMapper.decrease(parent_id);
         }
@@ -114,12 +113,11 @@ public class InteractionServiceImpl implements InteractionService {
     public Result clickVideo(String video_id) {
         String key="video";
         stringRedisTemplate.opsForZSet().incrementScore(key,video_id,1);
+        int BATCH_SIZE = 1000;
         if (clickCounter.incrementAndGet() >= BATCH_SIZE) {
-
             Double score=stringRedisTemplate.opsForZSet().score(key,video_id);
             int clickCount = (score != null) ? (int) Math.round(score) : 0;
             interactionMapper.updateVideoClickCount(clickCount,video_id);
-
             clickCounter.set(0);
         }
         return Result.success();
