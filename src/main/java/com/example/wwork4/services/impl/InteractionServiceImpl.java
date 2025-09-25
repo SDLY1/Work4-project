@@ -9,6 +9,7 @@ import com.example.wwork4.services.InteractionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -71,7 +72,7 @@ public class InteractionServiceImpl implements InteractionService {
 
 //    @Override
 //    public Result islike
-
+    @Transactional
     @Override
     public Result commentVideo(String video_id , String content,String user_id,String parent_id) {
         // 实现评论操作逻辑，例如保存评论信息到数据库
@@ -93,7 +94,7 @@ public class InteractionServiceImpl implements InteractionService {
         return new PageBean(count,commentList);
     }
 
-
+    @Transactional
     @Override
     public Result deleteComment(String video_id,String comment_id) {
         // 实现删除评论逻辑，例如从数据库删除评论信息

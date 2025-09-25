@@ -9,6 +9,7 @@ import com.example.wwork4.pojo.VO.UserVO;
 import com.example.wwork4.services.SocialService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 @Service
@@ -17,7 +18,7 @@ public class SocialServiceImpl implements SocialService {
     private SocialMapper socialMapper;
     private UserVO userVO;
 
-
+    @Transactional
     @Override
     public Result saveFollowUser(SocialDO social) {
         // 实现关注操作逻辑，例如更新用户关注关系
