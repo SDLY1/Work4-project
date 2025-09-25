@@ -30,7 +30,7 @@ public interface InteractionMapper {
     @Select("select count(likecount)from video where id=#{videoid}")
     public Integer getLikeCount(String videoid);
     @Update("update video set clickcount=#{clickCount} where id=#{videoid}")
-    public  void  updateVideoClickCount(int clickCount,String videoid)
+    public  void  updateVideoClickCount(int clickCount,String videoid);
 
     public List<VideoDO> selectByIds(@Param("videoIds")List<String> videoIds, @Param("start") Integer start, @Param("page_size") Integer page_size);
 }
