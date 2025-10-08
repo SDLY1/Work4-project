@@ -15,7 +15,7 @@ public interface InteractionMapper {
     public void childComment(String id);
     @Select("select count(videoid) from comment where videoid= #{id}")
     public Long Commentcount(String id);
-    @Select("select * from comment where videoid=#{videoId} limit #{start},#{page_size}")
+    @Select("select id,uesrid,videoid,parentid,likecount,childcount,content,createdAt,updatedAt,deletedAt from comment where videoid=#{videoId} limit #{start},#{page_size}")
     public List<CommentDO> getCommentList(String videoId, Integer start , Integer page_size);
     @Delete("delete from comment where videoid=#{video_id} and id=#{comment_id}")
     public  void deleteComment(String video_id,String comment_id);

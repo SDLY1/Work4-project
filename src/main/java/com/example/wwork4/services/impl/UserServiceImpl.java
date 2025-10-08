@@ -10,7 +10,9 @@ import com.example.wwork4.pojo.VO.LoginVO;
 import com.example.wwork4.pojo.VO.UserVO;
 import com.example.wwork4.services.UserService;
 import com.example.wwork4.utils.JwtUtils;
+import jdk.internal.icu.impl.Punycode;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -22,17 +24,21 @@ import java.util.Map;
 public class UserServiceImpl implements UserService {
     @Autowired
     private UserMapper userMapper;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
     @Override
     public void register(RegisterDTO registerDTO) {
             // 实现用户注册逻辑，例如保存用户信息到数据库
             UserDO user=new UserDO();
             user.setUsername(registerDTO.getUsername());
-            user.setPassword(registerDTO.getPassword());
+
+        user.setPassword(passwordEncoder.encode(registerDTO.getPassword()));
             //设置默认头像路径
             user.setAvatar("xxxxxxx");
             user.setCreateTime(LocalDateTime.now());
             user.setUpdateTime(LocalDateTime.now());
-            userMapper.register(user);
+            String role="user";
+        userMapper.register(user,role);
     }
     @Override
     public Result login(RegisterDTO registerDTO) {

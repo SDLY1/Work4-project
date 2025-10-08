@@ -19,4 +19,5 @@ public class UserDO {
     private LocalDateTime createTime;
     private LocalDateTime updateTime;
     private LocalDateTime deletedTime;
+    private String role;
 }

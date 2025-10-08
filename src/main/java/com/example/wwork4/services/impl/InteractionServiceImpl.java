@@ -52,7 +52,7 @@ public class InteractionServiceImpl implements InteractionService {
 //            Integer likeCount=interactionMapper.getLikeCount(videoId);
             if(isSuccess){
                 stringRedisTemplate.opsForSet().remove(key,userId);
-                stringRedisTemplate.opsForSet().add(userId,videoId);
+                stringRedisTemplate.opsForSet().remove(userId,videoId);
 //                stringRedisTemplate.opsForZSet().incrementScore("videoLikeCount",videoId,-1);
             }
         }else{
