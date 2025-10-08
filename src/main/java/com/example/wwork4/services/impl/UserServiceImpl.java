@@ -37,15 +37,16 @@ public class UserServiceImpl implements UserService {
             user.setAvatar("xxxxxxx");
             user.setCreateTime(LocalDateTime.now());
             user.setUpdateTime(LocalDateTime.now());
-            String role="user";
-        userMapper.register(user,role);
+            user.setRole("user");
+        userMapper.register(user);
     }
     @Override
     public Result login(RegisterDTO registerDTO) {
         // 实现用户登录逻辑，例如验证用户名密码
-        UserDO u= userMapper.getByUsernameAndPassword(registerDTO);
+//        registerDTO.setPassword(passwordEncoder.encode(registerDTO.getPassword()));
+        UserDO u= userMapper.getByUsername(registerDTO);
         //登录成功，生成令牌，下发令牌。
-        if(u!=null){
+        if(u!=null&&passwordEncoder.matches(registerDTO.getPassword(),u.getPassword())){
             Map<String,Object> claims =new HashMap<>();
             claims.put("id",u.getId());
             claims.put("username",u.getUsername());

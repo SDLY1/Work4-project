@@ -9,21 +9,21 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
+import static org.springframework.security.config.Customizer.withDefaults;
+
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http
+        http.csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/user/register","/user/login").permitAll() // 公开访问路径
                         .requestMatchers("/admin/**").hasRole("admin") // 只有 ADMIN 角色可以访问
                         .anyRequest().hasAnyRole("admin","user") //
                 )
-                .formLogin(form -> form
-                        .loginPage("/login")
-                        .permitAll()
+                .formLogin(withDefaults()
                 )
                 .logout(LogoutConfigurer::permitAll
                 );
