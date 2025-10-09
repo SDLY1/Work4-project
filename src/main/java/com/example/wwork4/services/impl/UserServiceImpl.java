@@ -50,6 +50,7 @@ public class UserServiceImpl implements UserService {
             Map<String,Object> claims =new HashMap<>();
             claims.put("id",u.getId());
             claims.put("username",u.getUsername());
+            claims.put("role",u.getRole());
             String jwt = JwtUtils.generateJwt(claims);
             // 创建LoginVO
             LoginVO loginVO=new LoginVO(u.getId().toString(),u.getUsername(),u.getAvatar(),u.getCreateTime(),u.getUpdateTime(),u.getDeletedTime(),jwt);

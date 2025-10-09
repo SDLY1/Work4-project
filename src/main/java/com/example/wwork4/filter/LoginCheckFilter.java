@@ -12,14 +12,22 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.web.servlet.ServletComponentScan;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 import java.io.IOException;
 import java.net.http.HttpRequest;
+import java.util.ArrayList;
+import java.util.List;
 
 @Slf4j
 
 //@WebFilter(urlPatterns = "/*")
+@Component
 public class LoginCheckFilter implements Filter {
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
@@ -40,7 +48,12 @@ public class LoginCheckFilter implements Filter {
             return ;
         }
         //获取请求头中的令牌(token)
-        String jwt=req.getHeader("token");
+        //
+        String authHeader=req.getHeader("Authorization");
+        String jwt=null;
+        if(authHeader.startsWith("Bearer ")){
+            jwt=authHeader.substring(7);
+        }
         //判断令牌是否存在，如果不存在，返回错误结果（未登录）
         if(!StringUtils.hasLength(jwt)){
             log.info("请求头未空，返回登录的信息");
@@ -58,6 +71,7 @@ public class LoginCheckFilter implements Filter {
                 Claims claims = JwtUtils.parseJWT(jwt);
                 JwtContext.setClaims(claims);
                 log.info("放行");
+                setSpringSecurityAuthentication(claims);
                 filterChain.doFilter(servletRequest, servletResponse);
             } catch (Exception e) {
                 e.printStackTrace();
@@ -72,5 +86,28 @@ public class LoginCheckFilter implements Filter {
             //放行
 
 
+    }
+    private void setSpringSecurityAuthentication(Claims claims) {
+        String username = claims.get("username",String.class);
+        String role = claims.get("role", String.class);
+
+        // 确保角色不为空且有正确格式
+        if (!StringUtils.hasText(role)) {
+            role = "ROLE_USER"; // 默认角色
+        } else if (!role.startsWith("ROLE_")) {
+            role = "ROLE_" + role; // 添加前缀
+        }
+
+        List<GrantedAuthority> authorities = new ArrayList<>();
+        authorities.add(new SimpleGrantedAuthority(role));
+
+        // 创建认证令牌
+        UsernamePasswordAuthenticationToken authentication =
+                new UsernamePasswordAuthenticationToken(username, null, authorities);
+
+        // 设置到SecurityContext中
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+
+        log.info("设置Spring Security认证: 用户={}, 角色={}", username, role);
     }
 }

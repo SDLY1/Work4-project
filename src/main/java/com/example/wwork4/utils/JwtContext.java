@@ -28,6 +28,9 @@ public class JwtContext {
         Claims claims = CLAIMS.get();
         return claims != null ? claims.get("username", String.class) : null;
     }
+    public static String getRole() {
+        Claims claims = CLAIMS.get();
+        return claims != null ? claims.get("role", String.class) : null;
+    }
 
-    // 其他字段...
 }

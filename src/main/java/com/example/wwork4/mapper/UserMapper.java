@@ -22,7 +22,7 @@ public interface UserMapper {
     public UserVO getUser(Integer id);
     @Update("update user set avatar = (#{file}) where id =#{id}")
     public void updateAvatar(String file,Integer id);
-    @Select("select id,username,password,avatar,created createTime,updated updateTime,deleted deletedTime from user where username= #{username} ")
+    @Select("select id,username,password,avatar,created createTime,updated updateTime,deleted deletedTime,role from user where username= #{username} ")
     UserDO getByUsername(RegisterDTO registerDTO);
     @Select("select id,username,password,avatar,created createTime,updated updateTime,deleted deletedTime,role from user where username=#{username}")
     UserDO getUserByUsername(String username);
