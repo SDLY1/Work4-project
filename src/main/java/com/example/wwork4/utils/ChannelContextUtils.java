@@ -19,6 +19,7 @@ import io.netty.util.concurrent.GlobalEventExecutor;
 import jakarta.annotation.Resource;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
@@ -34,6 +35,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @RequiredArgsConstructor
 public class ChannelContextUtils {
     private final SaveChatMessageQueue saveChatMessageQueue;
+
     @Resource
     UserMapper userMapper;
     @Resource
@@ -135,7 +137,12 @@ public class ChannelContextUtils {
         Message message=JSON.parseObject(textWebSocketFrame.text(), Message.class);
         //判断会话类型 U开头为单聊，G开头为群聊
         String contactType= message.getSessionId().substring(0,1);
-
+        //检测名感词
+        String content=message.getContent();
+        boolean isSensitiveWord = SensitiveWordTrieUtils.containsSensitiveWord(content);
+        if (isSensitiveWord){
+            message.setContent(SensitiveWordTrieUtils.replaceSensitiveWords(content));
+        }
         if("U".equals(contactType)){
             Boolean isSuccess=sendPersionMessage(message,message.getReceiverId());
             if(isSuccess) {
