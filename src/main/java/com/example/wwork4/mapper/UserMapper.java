@@ -8,6 +8,9 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
 
+import java.time.LocalDateTime;
+import java.util.Date;
+
 @Mapper
 public interface UserMapper {
 
@@ -26,4 +29,8 @@ public interface UserMapper {
     UserDO getByUsername(RegisterDTO registerDTO);
     @Select("select id,username,password,avatar,created createTime,updated updateTime,deleted deletedTime,role from user where username=#{username}")
     UserDO getUserByUsername(String username);
+    @Update("update user set updated =#{time} where id=#{id}")
+    void updateTime(Integer id, LocalDateTime time);
+    @Select("select username from user where id=#{id}")
+    String getUsernameByUserId(Integer id);
 }

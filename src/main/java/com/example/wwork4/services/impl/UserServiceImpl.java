@@ -10,7 +10,7 @@ import com.example.wwork4.pojo.VO.LoginVO;
 import com.example.wwork4.pojo.VO.UserVO;
 import com.example.wwork4.services.UserService;
 import com.example.wwork4.utils.JwtUtils;
-import jdk.internal.icu.impl.Punycode;
+//import jdk.internal.icu.impl.Punycode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;

@@ -1,0 +1,43 @@
+spring:
+  application:
+    name: Wwork4
+  data:
+    redis:
+      host: 127.0.0.1
+      port: 6379
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/work4
+    username: root
+    password: "123456"
+  rabbitmq:
+    host: localhost        # RabbitMQ 服务地址（本地默认 localhost）
+    port: 5672             # 默认通信端口
+    username: guest        # 默认用户名
+    password: guest        # 默认密码
+    virtual-host: /        # 默认虚拟主机
+    listener:
+      simple:
+        prefetch: 1
+
+  # Docker 配置示例（已注释）
+  # data:
+  #   redis:
+  #     host: redis
+  # datasource:
+  #   url: jdbc:mysql://mysql-db:3306/work4
+
+# debug: true  # 已注释
+mybatis:
+  mapper-locations: classpath:mapper/*.xml
+
+server:
+  port: 8080
+
+logging:
+  level:
+    com.example.wwork4.mapper: debug
+
+
+
+
