@@ -42,8 +42,8 @@ public class ChatController {
         return chatService.addGroup(leaderId,groupName,userIds,text);
     }
     @GetMapping("/session")
-    public Result getSession(String sessionId){
-        return chatService.getSession(sessionId);
+    public Result getSession(String sessionId,Integer userId){
+        return chatService.getSession(sessionId,userId);
     }
 
 }

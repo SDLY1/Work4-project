@@ -20,11 +20,14 @@ import jakarta.annotation.Resource;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 @Slf4j
 @Component
@@ -36,7 +39,7 @@ public class ChannelContextUtils {
     @Resource
     ChatMapper chatMapper;
     @Resource
-    RedisTemplate redisTemplate;
+    StringRedisTemplate stringRedisTemplate;
     private static final ConcurrentHashMap<String,Channel> USER_CONTEXT_MAP =new ConcurrentHashMap<>();
     private static final ConcurrentHashMap<String,ChannelGroup>  GROUP_CONTEXT_MAP =new ConcurrentHashMap<>();
     //用户上线
@@ -67,10 +70,7 @@ public class ChannelContextUtils {
         }
         group.add(channel);
     }
-    public void send2Group(String massage){
-        ChannelGroup group=GROUP_CONTEXT_MAP.get("10000");
-        group.writeAndFlush(new TextWebSocketFrame(massage));
-    }
+
     public  void removeContext(Channel channel){
         Attribute<String> attribute =channel.attr(AttributeKey.valueOf(channel.id().toString()));
         String userId =attribute.get();
@@ -94,11 +94,13 @@ public class ChannelContextUtils {
     //单聊发送消息
     public static boolean sendPersionMessage(Message message, Integer receiverId){
         if(receiverId==null){
+            log.info("接收ID错误");
             return false;
         }
         // 取出对应的管道
         Channel channel=USER_CONTEXT_MAP.get(receiverId.toString());
         if(channel==null){
+            log.info("用户不在线");
             return false;
         }
         //用fastjson将消息对象转成字符串
@@ -107,7 +109,7 @@ public class ChannelContextUtils {
         return true;
     }
     //群聊发送消息
-    public static List<Integer> sendGroupMessage(Message message, Integer groupId){
+    public static Set<Integer> sendGroupMessage(Message message, Integer groupId){
         if(groupId==null){
             return null;
         }
@@ -117,9 +119,12 @@ public class ChannelContextUtils {
         }
         List<Integer> successUserIdList=new ArrayList<>();
         channelGroup.forEach(channel -> {channel.writeAndFlush(new TextWebSocketFrame(JSON.toJSONString(message)));
-            successUserIdList.add((Integer) channel.attr(AttributeKey.valueOf(channel.id().toString())).get());
+            String userId= (String) channel.attr(AttributeKey.valueOf(channel.id().toString())).get();
+            if(userId!=null) {
+                successUserIdList.add(Integer.valueOf(userId));
+            }
         });
-        return successUserIdList;
+        return new HashSet<>(successUserIdList);
     }
 
     public void receiveMessage(ChannelHandlerContext channelHandlerContext, TextWebSocketFrame textWebSocketFrame){
@@ -130,18 +135,31 @@ public class ChannelContextUtils {
         Message message=JSON.parseObject(textWebSocketFrame.text(), Message.class);
         //判断会话类型 U开头为单聊，G开头为群聊
         String contactType= message.getSessionId().substring(0,1);
+
         if("U".equals(contactType)){
             Boolean isSuccess=sendPersionMessage(message,message.getReceiverId());
             if(isSuccess) {
                 saveChatMessageQueue.sendSaveChatMsgQueue(MessageUtils.changeMessage(message));
             }else{
-                log.info("发送失败");
+                //0表示未发送
+                message.setStatus(0);
+                String unreadCountKey="unread:count:uid:{"+userId+"}:room:{"+message.getSessionId()+"}";
+                stringRedisTemplate.opsForValue().increment(unreadCountKey);
+                saveChatMessageQueue.sendSaveChatMsgQueue(MessageUtils.changeMessage(message));
             }
             return;
         }
         if("G".equals(contactType)){
-            sendGroupMessage(message,message.getReceiverId());
+            Set<Integer> successList = sendGroupMessage(message, message.getReceiverId());
             saveChatMessageQueue.sendSaveChatMsgQueue(MessageUtils.changeMessage(message));
+            List<Integer> totalList=chatMapper.getUserIdByGroupId(message.getReceiverId());
+            for(Integer i:totalList){
+                if(!successList.contains(i)){
+                    String unreadCountKey="unread:count:uid:{"+i+"}:room:{"+message.getSessionId()+"}";
+                    stringRedisTemplate.opsForValue().increment(unreadCountKey);
+                }
+            }
+            return ;
         }
         throw new RuntimeException("会话ID有误");
     }

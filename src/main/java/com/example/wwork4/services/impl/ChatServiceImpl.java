@@ -11,6 +11,7 @@ import com.example.wwork4.pojo.VO.UnreadVO;
 import com.example.wwork4.services.ChatService;
 import jakarta.annotation.Resource;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,7 +24,8 @@ public class ChatServiceImpl implements ChatService {
     @Resource
     UserMapper userMapper;
     @Resource
-    RedisTemplate redisTemplate;
+    StringRedisTemplate stringRedisTemplate;
+
     @Transactional
     @Override
     public Result addContact(Integer user1Id, Integer user2Id) {
@@ -57,8 +59,8 @@ public class ChatServiceImpl implements ChatService {
 
 
         for(SessionVO i:sessionVOList){
-            String unreadCountKey="unread:count:uid:{"+userId+"}:room:{"+i+"}";
-           i.setUnReadCount((Integer) redisTemplate.opsForValue().get(unreadCountKey));
+            String unreadCountKey="unread:count:uid:{"+userId+"}:room:{"+i.getSessionId()+"}";
+           i.setUnReadCount((stringRedisTemplate.opsForValue().get(unreadCountKey)));
         }
         return Result.success(sessionVOList);
     }
@@ -75,24 +77,29 @@ public class ChatServiceImpl implements ChatService {
                 user_id.add(pos);
             }
         }
+        user_id.add(leaderId);
         //通过时间戳来设定群组的sessionId
         String sessionId="G"+leaderId+System.currentTimeMillis();
         GroupDO groupDO=new GroupDO();
         groupDO.setLeaderId(leaderId);
         groupDO.setGroupName(groupName);
-        groupDO.setCount(user_id.size()+1);
+        groupDO.setCount(user_id.size());
         groupDO.setText(text);
         groupDO.setSessionId(sessionId);
         chatMapper.addGroup(groupDO);
         Integer groupId=chatMapper.getGroupIdBySessionId(sessionId);
-        chatMapper.addSession(leaderId,groupId,sessionId,groupName,0);
+        for(Integer i:user_id){
+            chatMapper.addSession(i,groupId,sessionId,groupName,0);
+        }
         chatMapper.addGroupUser(groupId,user_id);
         return Result.success();
     }
 
     @Override
-    public Result getSession(String sessionId) {
+    public Result getSession(String sessionId,Integer userId) {
         List<MessageVO> messageVOList=chatMapper.getMessage(sessionId);
+        String unreadCountKey="unread:count:uid:{"+userId+"}:room:{"+sessionId+"}";
+        stringRedisTemplate.opsForValue().set(unreadCountKey, String.valueOf(0));
         return Result.success(messageVOList);
     }
 

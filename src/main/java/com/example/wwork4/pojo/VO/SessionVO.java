@@ -12,5 +12,5 @@ public class SessionVO {
     private Integer contactId;
     private String sessionId;
     private String lastSenderName;
-    private Integer unReadCount;
+    private String unReadCount;
 }

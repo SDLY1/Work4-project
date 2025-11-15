@@ -15,5 +15,5 @@ public interface ChatService {
 
     Result addGroup(Integer leaderId, String groupName, List<String> userIds,String text);
 
-    Result getSession(String sessionId);
+    Result getSession(String sessionId,Integer userId);
 }
