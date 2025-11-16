@@ -8,4 +8,5 @@ public interface AdminService {
     Result getVideoList(Integer pageSize, Integer pageNum);
     Result deleteVideo(String videoId);
 
+    Result confirmVideo(String videoId);
 }

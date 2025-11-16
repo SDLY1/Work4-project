@@ -15,6 +15,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 @Service
@@ -26,6 +27,8 @@ public class ChatServiceImpl implements ChatService {
     @Resource
     StringRedisTemplate stringRedisTemplate;
 
+    @Resource
+    RedisTemplate redisTemplate;
     @Transactional
     @Override
     public Result addContact(Integer user1Id, Integer user2Id) {
@@ -96,8 +99,12 @@ public class ChatServiceImpl implements ChatService {
     }
 
     @Override
-    public Result getSession(String sessionId,Integer userId) {
-        List<MessageVO> messageVOList=chatMapper.getMessage(sessionId);
+    public Result getSession(String sessionId, Integer userId, LocalDateTime time) {
+        if(time==null){
+            time=LocalDateTime.now().minusMonths(1);
+        }
+
+        List<MessageVO> messageVOList=chatMapper.getMessage(sessionId,time);
         String unreadCountKey="unread:count:uid:{"+userId+"}:room:{"+sessionId+"}";
         stringRedisTemplate.opsForValue().set(unreadCountKey, String.valueOf(0));
         return Result.success(messageVOList);

@@ -31,4 +31,10 @@ public class AdminServiceImpl implements AdminService {
             return Result.error("删除视频失败");
         }
     }
+
+    @Override
+    public Result confirmVideo(String videoId) {
+        adminMapper.confirmVideo(videoId);
+        return Result.success();
+    }
 }

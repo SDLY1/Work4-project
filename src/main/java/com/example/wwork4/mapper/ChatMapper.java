@@ -9,6 +9,7 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Mapper
@@ -33,8 +34,8 @@ public interface ChatMapper {
     public List<String> getSessionIdList(Integer userId);
     @Insert("insert into chat_message (session_id, message_type, message_content, send_user_id,send_user_name, send_time, contact_id, contact_type, status) value(#{sessionId},#{messageType},#{content},#{senderId},#{senderName},#{time},#{receiverId},#{contactType},#{status})")
     void addMessage(MessageDO messageDO);
-    @Select("select session_id as sessionId, message_type messageType, message_content content, send_user_id senderId,send_user_name senderName, send_time time, contact_id receiverId, contact_type contactType, status from chat_message where session_id=#{sessionId}")
-    List<MessageVO> getMessage(String sessionId);
+    @Select("select session_id as sessionId, message_type messageType, message_content content, send_user_id senderId,send_user_name senderName, send_time time, contact_id receiverId, contact_type contactType, status from chat_message where session_id=#{sessionId} and send_time>#{time}")
+    List<MessageVO> getMessage(String sessionId, LocalDateTime time);
     @Select("select  user_id from group_user where group_id=#{receiverId}")
     List<Integer> getUserIdByGroupId(Integer receiverId);
 }

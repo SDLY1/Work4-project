@@ -6,6 +6,7 @@ import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Slf4j
@@ -42,8 +43,8 @@ public class ChatController {
         return chatService.addGroup(leaderId,groupName,userIds,text);
     }
     @GetMapping("/session")
-    public Result getSession(String sessionId,Integer userId){
-        return chatService.getSession(sessionId,userId);
+    public Result getSession(String sessionId, Integer userId, LocalDateTime time){
+        return chatService.getSession(sessionId,userId,time);
     }
 
 }

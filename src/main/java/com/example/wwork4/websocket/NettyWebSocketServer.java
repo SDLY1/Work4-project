@@ -40,7 +40,7 @@ public class NettyWebSocketServer {
     public  void start(){
         logger.info("SpringBoot启动完成，开始启动Netty服务器...");
 
-        // ✅ 在独立线程中启动Netty
+        // 在独立线程中启动Netty
         new Thread(() -> {
             try {
                 run();
