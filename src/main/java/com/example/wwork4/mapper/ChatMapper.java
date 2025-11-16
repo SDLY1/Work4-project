@@ -20,7 +20,7 @@ public interface ChatMapper {
     void addSession(Integer userId,Integer contactId,String sessionId ,String contactName ,Integer state);
     @Update("update chat_session_user set state=1 where contact_id=#{targetId} and user_id=#{userId}")
     Boolean blockSomeone(Integer userId,Integer targetId);
-    @Select("select session_id sessionId,contact_id contactId,contact_name contactName from chat_session_user where user_id=#{userId} ")
+    @Select("select session_id sessionId,contact_id contactId,contact_name contactName from chat_session_user where user_id=#{userId} and state = 0 ")
     public List<SessionVO> getSessionList(Integer userId);
     @Insert("insert into group_session(group_name,leader_id,count,text,session_id)value (#{groupName},#{leaderId},#{count},#{text},#{sessionId})")
     void addGroup(GroupDO groupDO);

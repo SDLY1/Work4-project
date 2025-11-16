@@ -25,10 +25,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 @Slf4j
 @Component
@@ -119,6 +116,7 @@ public class ChannelContextUtils {
         if(channelGroup==null){
             return null;
         }
+
         List<Integer> successUserIdList=new ArrayList<>();
         channelGroup.forEach(channel -> {channel.writeAndFlush(new TextWebSocketFrame(JSON.toJSONString(message)));
             String userId= (String) channel.attr(AttributeKey.valueOf(channel.id().toString())).get();
@@ -137,11 +135,22 @@ public class ChannelContextUtils {
         Message message=JSON.parseObject(textWebSocketFrame.text(), Message.class);
         //判断会话类型 U开头为单聊，G开头为群聊
         String contactType= message.getSessionId().substring(0,1);
-        //检测名感词
+        //检测敏感词
         String content=message.getContent();
         boolean isSensitiveWord = SensitiveWordTrieUtils.containsSensitiveWord(content);
         if (isSensitiveWord){
             message.setContent(SensitiveWordTrieUtils.replaceSensitiveWords(content));
+        }
+        if(message.getMessageType()==1){
+
+
+            try {
+                byte[] imageBytes = java.util.Base64.getDecoder().decode(message.getContent());
+            } catch (IllegalArgumentException e) {
+                log.info("图片解码错误");
+            }
+            String url= UUID.randomUUID().toString()+".png";
+            message.setContent(url);
         }
         if("U".equals(contactType)){
             Boolean isSuccess=sendPersionMessage(message,message.getReceiverId());
