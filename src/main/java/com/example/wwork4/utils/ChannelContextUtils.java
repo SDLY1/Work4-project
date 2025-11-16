@@ -24,6 +24,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -32,7 +33,9 @@ import java.util.concurrent.ConcurrentHashMap;
 @RequiredArgsConstructor
 public class ChannelContextUtils {
     private final SaveChatMessageQueue saveChatMessageQueue;
-
+    private final RedisTemplate redisTemplate;
+    private static final String MESSAGE_KEY_PREFIX = "chat:session:";
+    private static final int MAX_CACHE_SIZE = 100;
     @Resource
     UserMapper userMapper;
     @Resource
@@ -152,12 +155,13 @@ public class ChannelContextUtils {
             String url= UUID.randomUUID().toString()+".png";
             message.setContent(url);
         }
+        addMessageToCache(message);
         if("U".equals(contactType)){
             Boolean isSuccess=sendPersionMessage(message,message.getReceiverId());
             if(isSuccess) {
                 saveChatMessageQueue.sendSaveChatMsgQueue(MessageUtils.changeMessage(message));
             }else{
-                //0表示未发送
+                //0表示未接收
                 message.setStatus(0);
                 String unreadCountKey="unread:count:uid:{"+userId+"}:room:{"+message.getSessionId()+"}";
                 stringRedisTemplate.opsForValue().increment(unreadCountKey);
@@ -167,6 +171,8 @@ public class ChannelContextUtils {
         }
         if("G".equals(contactType)){
             Set<Integer> successList = sendGroupMessage(message, message.getReceiverId());
+            //0表示未接收
+            message.setStatus(0);
             saveChatMessageQueue.sendSaveChatMsgQueue(MessageUtils.changeMessage(message));
             List<Integer> totalList=chatMapper.getUserIdByGroupId(message.getReceiverId());
             for(Integer i:totalList){
@@ -179,7 +185,26 @@ public class ChannelContextUtils {
         }
         throw new RuntimeException("会话ID有误");
     }
+    public void addMessageToCache(Message message) {
+        String key = MESSAGE_KEY_PREFIX + message.getSessionId() + ":messages";
 
+        try {
+            // 1. 将消息序列化为JSON
+            String messageJson = JSON.toJSONString(message);
+
+            // 2. 从右侧推入新消息（最新的在右侧）
+            redisTemplate.opsForList().rightPush(key, messageJson);
+
+            // 3. 修剪列表，保持固定大小
+            redisTemplate.opsForList().trim(key, -MAX_CACHE_SIZE, -1);
+
+            // 4. 设置过期时间（7天）
+            redisTemplate.expire(key, Duration.ofDays(7));
+
+        } catch (Exception e) {
+            throw new RuntimeException("缓存消息失败", e);
+        }
+    }
 
 
 }

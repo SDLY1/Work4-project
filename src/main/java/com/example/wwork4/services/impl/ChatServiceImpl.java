@@ -1,14 +1,17 @@
 package com.example.wwork4.services.impl;
 
+import com.alibaba.fastjson.JSON;
 import com.example.wwork4.mapper.ChatMapper;
 import com.example.wwork4.mapper.UserMapper;
 import com.example.wwork4.pojo.DO.GroupDO;
 import com.example.wwork4.pojo.DO.MessageDO;
+import com.example.wwork4.pojo.Message;
 import com.example.wwork4.pojo.Result;
 import com.example.wwork4.pojo.VO.MessageVO;
 import com.example.wwork4.pojo.VO.SessionVO;
 import com.example.wwork4.pojo.VO.UnreadVO;
 import com.example.wwork4.services.ChatService;
+import com.example.wwork4.utils.MessageUtils;
 import jakarta.annotation.Resource;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -20,6 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 @Service
 public class ChatServiceImpl implements ChatService {
+    private static final String MESSAGE_KEY_PREFIX = "chat:session:";
     @Resource
     ChatMapper chatMapper;
     @Resource
@@ -103,8 +107,41 @@ public class ChatServiceImpl implements ChatService {
         if(time==null){
             time=LocalDateTime.now().minusMonths(1);
         }
+        Boolean isNeed=false;
+        String key = MESSAGE_KEY_PREFIX + sessionId + ":messages";
+        LocalDateTime oldestTime=null;
+        try {
 
-        List<MessageVO> messageVOList=chatMapper.getMessage(sessionId,time);
+            String oldestMessageJson = (String) redisTemplate.opsForList().index(key, 0);
+
+            if (oldestMessageJson == null) {
+                isNeed=true;
+            }
+            Message message= JSON.parseObject(oldestMessageJson,Message.class);
+            oldestTime=message.getTime();
+            if(oldestTime.isAfter(time)){
+                isNeed=true;
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("获取最老消息失败", e);
+        }
+        List<MessageVO> messageVOList = new ArrayList<>();
+        if(isNeed) {
+             messageVOList = chatMapper.getMessage(sessionId, time);
+        }else{
+            try {
+                // 获取列表长度
+                Long size = redisTemplate.opsForList().size(key);
+                // 获取索引 0 到 size-1 的所有消息（即全部消息）
+                List<String> messageJsons = redisTemplate.opsForList().range(key, 0, -1);
+                for (String json : messageJsons) {
+                    Message message = JSON.parseObject(json,Message.class);
+                    messageVOList.add(MessageUtils.changeMessageToVO(message));
+                }
+            } catch (Exception e) {
+                throw new RuntimeException("获取所有消息失败", e);
+            }
+        }
         String unreadCountKey="unread:count:uid:{"+userId+"}:room:{"+sessionId+"}";
         stringRedisTemplate.opsForValue().set(unreadCountKey, String.valueOf(0));
         return Result.success(messageVOList);
